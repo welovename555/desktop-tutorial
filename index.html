@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEXAS POS - เข้าสู่ระบบ</title>
+    <link rel="stylesheet" href="styles/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>TEXAS POS</h1>
+                <p>ระบบขายหน้าร้าน</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="input-group">
+                    <label for="employeeCode">รหัสพนักงาน</label>
+                    <input 
+                        type="password" 
+                        id="employeeCode" 
+                        maxlength="4" 
+                        placeholder="กรอกรหัส 4 หลัก"
+                        required
+                    >
+                </div>
+                
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">เข้าสู่ระบบ</span>
+                    <div class="btn-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                    </div>
+                </button>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/login.js"></script>
+</body>
+</html>

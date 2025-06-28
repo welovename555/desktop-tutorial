@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEXAS POS - ระบบขายหน้าร้าน</title>
+    <link rel="stylesheet" href="styles/pos.css">
+</head>
+<body data-theme="light">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <p>กำลังโหลด...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <div class="pos-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>TEXAS POS</h2>
+                <div class="user-info">
+                    <span id="currentUser">พนักงาน</span>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item active" data-view="sell">
+                    <span class="nav-icon">🛒</span>
+                    <span class="nav-text">ขายของ</span>
+                </li>
+                <li class="nav-item" data-view="history">
+                    <span class="nav-icon">📆</span>
+                    <span class="nav-text">ประวัติการขาย</span>
+                </li>
+                <li class="nav-item" data-view="stock">
+                    <span class="nav-icon">🏷️</span>
+                    <span class="nav-text">จัดการสินค้า</span>
+                </li>
+                <li class="nav-item admin-only" data-view="add-product" style="display: none;">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">เพิ่มสินค้าใหม่</span>
+                </li>
+                <li class="nav-item" data-view="shift-summary">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">สรุปยอดกะ</span>
+                </li>
+                <li class="nav-item" id="themeToggle">
+                    <span class="nav-icon">🎨</span>
+                    <span class="nav-text">เปลี่ยนธีม</span>
+                </li>
+                <li class="nav-item" id="logoutBtn">
+                    <span class="nav-icon">🚪</span>
+                    <span class="nav-text">ออกจากระบบ</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sell View -->
+            <div id="sell-view" class="content-view active">
+                <div class="view-header">
+                    <h2>ขายสินค้า</h2>
+                    <div class="search-bar">
+                        <input type="text" id="productSearch" placeholder="ค้นหาสินค้า...">
+                        <button id="searchBtn">🔍</button>
+                    </div>
+                </div>
+                
+                <div class="sell-content">
+                    <div class="products-section">
+                        <div class="category-filters">
+                            <button class="category-btn active" data-category="all">ทั้งหมด</button>
+                            <button class="category-btn" data-category="food">อาหาร</button>
+                            <button class="category-btn" data-category="drink">เครื่องดื่ม</button>
+                            <button class="category-btn" data-category="snack">ขนม</button>
+                        </div>
+                        
+                        <div id="productsGrid" class="products-grid">
+                            <!-- Products will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="cart-section">
+                        <div class="cart-header">
+                            <h3>ตะกร้าสินค้า</h3>
+                            <button id="clearCart" class="clear-btn">ล้างตะกร้า</button>
+                        </div>
+                        
+                        <div id="cartItems" class="cart-items">
+                            <div class="empty-cart">
+                                <p>ไม่มีสินค้าในตะกร้า</p>
+                            </div>
+                        </div>
+                        
+                        <div class="cart-summary">
+                            <div class="total-amount">
+                                <span>ยอดรวม: </span>
+                                <span id="totalAmount">฿0</span>
+                            </div>
+                            <button id="checkoutBtn" class="checkout-btn" disabled>ชำระเงิน</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History View -->
+            <div id="history-view" class="content-view">
+                <div class="view-header">
+                    <h2>ประวัติการขายวันนี้</h2>
+                    <div class="date-info">
+                        <span id="currentDate"></span>
+                    </div>
+                </div>
+                
+                <div class="history-content">
+                    <div class="history-stats">
+                        <div class="stat-card">
+                            <h4>ยอดขายรวม</h4>
+                            <p id="totalSales">฿0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>จำนวนบิล</h4>
+                            <p id="totalOrders">0</p>
+                        </div>
+                    </div>
+                    
+                    <div id="salesHistory" class="sales-history">
+                        <!-- Sales history will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock View -->
+            <div id="stock-view" class="content-view">
+                <div class="view-header">
+                    <h2>จัดการสต็อกสินค้า</h2>
+                </div>
+                
+                <div id="stockList" class="stock-list">
+                    <!-- Stock items will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Add Product View (Admin Only) -->
+            <div id="add-product-view" class="content-view">
+                <div class="view-header">
+                    <h2>เพิ่มสินค้าใหม่</h2>
+                </div>
+                
+                <form id="addProductForm" class="add-product-form">
+                    <div class="form-group">
+                        <label for="productName">ชื่อสินค้า</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productPrice">ราคา (บาท)</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productCategory">หมวดหมู่</label>
+                        <select id="productCategory" required>
+                            <option value="">เลือกหมวดหมู่</option>
+                            <option value="food">อาหาร</option>
+                            <option value="drink">เครื่องดื่ม</option>
+                            <option value="snack">ขนม</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="productStock">จำนวนสต็อก</label>
+                        <input type="number" id="productStock" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">เพิ่มสินค้า</button>
+                </form>
+            </div>
+
+            <!-- Shift Summary View -->
+            <div id="shift-summary-view" class="content-view">
+                <div class="view-header">
+                    <h2>สรุปยอดกะ</h2>
+                </div>
+                
+                <div class="shift-summary-content">
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <h4>ยอดขายรวม</h4>
+                            <p id="shiftTotalSales">฿0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>จำนวนบิล</h4>
+                            <p id="shiftTotalOrders">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>เงินสด</h4>
+                            <p id="shiftCashSales">฿0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>เงินโอน</h4>
+                            <p id="shiftTransferSales">฿0</p>
+                        </div>
+                    </div>
+                    
+                    <button id="closeShiftBtn" class="close-shift-btn">ปิดกะ</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="checkoutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>ชำระเงิน</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="checkoutItems" class="checkout-items">
+                    <!-- Checkout items will be displayed here -->
+                </div>
+                
+                <div class="checkout-total">
+                    <h4>ยอดรวม: <span id="checkoutTotal">฿0</span></h4>
+                </div>
+                
+                <div class="payment-methods">
+                    <h4>วิธีการชำระเงิน</h4>
+                    <div class="payment-options">
+                        <button class="payment-btn active" data-method="cash">เงินสด</button>
+                        <button class="payment-btn" data-method="transfer">เงินโอน</button>
+                    </div>
+                </div>
+                
+                <div id="cashPayment" class="cash-payment">
+                    <div class="form-group">
+                        <label for="cashReceived">เงินที่ได้รับ (บาท)</label>
+                        <input type="number" id="cashReceived" step="0.01">
+                    </div>
+                    <div class="change-amount">
+                        <span>เงินทอน: </span>
+                        <span id="changeAmount">฿0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="confirmPayment" class="confirm-btn">ยืนยันการชำระเงิน</button>
+                <button class="cancel-btn close-modal">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Update Modal -->
+    <div id="stockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>อัพเดทสต็อก</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="stockProductName">สินค้า</label>
+                    <input type="text" id="stockProductName" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="currentStock">สต็อกปัจจุบัน</label>
+                    <input type="number" id="currentStock" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newStock">สต็อกใหม่</label>
+                    <input type="number" id="newStock" required>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="updateStock" class="confirm-btn">อัพเดท</button>
+                <button class="cancel-btn close-modal">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/pos.js"></script>
+</body>
+</html>
